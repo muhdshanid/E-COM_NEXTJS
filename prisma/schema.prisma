@@ -25,7 +25,8 @@ model Cart {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   items  CartItem[]
-
+  userId String? @db.ObjectId
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
  @@map("carts") 
 }
 
