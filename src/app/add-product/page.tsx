@@ -1,7 +1,9 @@
 import Button from "@/components/Button";
 import { prisma } from "@/libs/db/prisma";
 import { Metadata } from "next"
+import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
+import { authOptions } from "../api/auth/[...nextauth]/route";
 
 export const metadata: Metadata = {
     title: 'Add Product - Flomazon'
@@ -12,6 +14,11 @@ export const addProduct = async (formData: FormData) => {
 
     "use server";
 
+    const session = await  getServerSession(authOptions)
+    if(!session){
+        redirect("/api/auth/signin?callbackUrl=/add-product")
+    }
+
     const name = formData.get("name")?.toString()
     const desc = formData.get("desc")?.toString()
     const imageUrl = formData.get("imageUrl")?.toString()
@@ -19,20 +26,25 @@ export const addProduct = async (formData: FormData) => {
 
     if(!name || !desc || !imageUrl ||!price)  throw new Error("Missing required fields")
 
-    await prisma.product.create({
-        data: {
-            name,
-            desc,
-            imageUrl,
-            price
-        }
-    })
+        await prisma.product.create({
+            data: {
+                name,
+                desc,
+                imageUrl,
+                price
+            }
+        })
+
 
     redirect("/")
 }
 
 
-const AddProduct = () => {
+const AddProduct = async() => {
+    const session = await  getServerSession(authOptions)
+    if(!session){
+        redirect("/api/auth/signin?callbackUrl=/add-product")
+    }
   return (
     <div className="min-h-screen m-auto">
         <h1 className="text-lg font-bold mb-3">Add Product</h1>
